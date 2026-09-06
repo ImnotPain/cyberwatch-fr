@@ -1,0 +1,38 @@
+name: 🛡️ S3cur1ty News Fr
+
+on:
+  schedule:
+    # Toutes les heures à la minute 17
+    - cron: "17 * * * *"
+
+  # Permet aussi de lancer le bot manuellement
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  cyberwatch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Récupération du projet
+        uses: actions/checkout@v4
+
+      - name: 🐍 Installation de Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 🛡️ Recherche des nouvelles annonces
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: python cyberwatch.py
+
+      - name: 💾 Sauvegarde des annonces déjà vues
+        run: |
+          git config user.name "CyberWatch Bot"
+          git config user.email "cyberwatch@github-actions"
+          git add seen.json
+          git diff --staged --quiet || git commit -m "🤖 Mise à jour des annonces vues"
+          git push
